@@ -1,0 +1,16 @@
+{
+  "commands": {
+    "status": {
+      "services": [
+        {
+          "name": "arthursegato.dev",
+          "url": "https://www.arthursegato.dev/api/status"
+        },
+        {
+          "name": "theendpoem.com",
+          "url": "https://www.theendpoem.com/api/status"
+        }
+      ]
+    }
+  }
+}

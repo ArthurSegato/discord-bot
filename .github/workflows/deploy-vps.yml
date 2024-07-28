@@ -1,0 +1,23 @@
+name: VPS Deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Deploy-Bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun Runtime
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: bun install
+
+        # add deploy code later
+      - name: Test bot
+        run: bun test
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
