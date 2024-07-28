@@ -1,10 +1,10 @@
-name: VPS
+name: VPS Deploy
 on:
   push:
     branches:
       - main
 jobs:
-  Deploy:
+  Build-Bot:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
