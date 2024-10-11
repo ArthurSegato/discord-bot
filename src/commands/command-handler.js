@@ -19,7 +19,7 @@ const handleCommands = (client) => {
     // Skip files that are missing the "data" or "execute" properties
     if ((!"data") in command && (!"execute") in command) {
       console.log(
-        `[ WARNING ] The command at ${file} is missing a required "data" or "execute" property.`,
+        `[ ${Bun.color("yellow", "ansi")}WARNING${Bun.color("white", "ansi")} ] The command at ${file} is missing a required "data" or "execute" property.`,
       );
       continue;
     }
@@ -29,7 +29,7 @@ const handleCommands = (client) => {
   }
 
   // If commands are being deployed, return their data
-  if (!client) return commands.map((command) => command.data.toJSON());
+  if (!client) return commandList.map((command) => command.data.toJSON());
 
   // If not, create a command collection for the client
   client.commands = new Collection();
@@ -50,7 +50,7 @@ const handleCommands = (client) => {
     // Stop if no matching command is found
     if (!command) {
       console.error(
-        `[ WARNING ] No command matching ${interaction.commandName} was found.`,
+        `[ ${Bun.color("yellow", "ansi")}WARNING${Bun.color("white", "ansi")} ] No command matching ${interaction.commandName} was found.`,
       );
       return;
     }
@@ -59,7 +59,9 @@ const handleCommands = (client) => {
       // Execute the command
       await command.execute(interaction);
     } catch (error) {
-      console.error(`[ FAIL ] ${error}`);
+      console.error(
+        `[ ${Bun.color("red", "ansi")}FAIL${Bun.color("white", "ansi")} ] ${error}`,
+      );
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
           content: "There was an error while executing this command!",

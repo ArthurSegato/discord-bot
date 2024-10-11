@@ -9,7 +9,9 @@ handleCommands(client);
 
 // Annnounce when the client is ready
 client.once(Events.ClientReady, (c) => {
-  console.log(`[ OK ] Logged in as ${c.user.tag}`);
+  console.log(
+    `[ ${Bun.color("green", "ansi")}OK${Bun.color("white", "ansi")} ] Logged in as ${c.user.tag}`,
+  );
 });
 
 // Log in to discord using the token
