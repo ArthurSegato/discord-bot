@@ -5,3 +5,4 @@ bun.lockb
 .env.test.local
 .env.production.local
 .env.local
+builds

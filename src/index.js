@@ -1,10 +1,10 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { handleCommands } from "./commands/command-handler.js";
 
-// Create a new client instance
+// Create a client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Load commands
+// Load commands into the client
 handleCommands(client);
 
 // Annnounce when the client is ready

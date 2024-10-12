@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require("discord.js");
-const ms = require("ms");
 const {
   commands: {
     status: { services },
@@ -9,33 +8,44 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("status")
-    .setDescription("Checks the status of all systems."),
+    .setDescription("Checks the status of all systems")
+    .addStringOption((option) =>
+      option
+        .setName("attempts")
+        .setDescription(
+          "How many attempts to ping the server will be executed (default 5)",
+        ),
+    ),
   async execute(interaction) {
-    // Create a array of promisses
-    const promisses = [];
-
-    // Ping a service and return the name, if is online or not and time
-    const pingService = async (name, url) => {
+    const pingService = async (service) => {
       const timeBeginning = Date.now();
 
-      const status = await fetch(url).then((r) => {
-        if (r.ok) return "online";
-        else return "offline";
+      const status = await fetch(service).then((r) => {
+        return r.ok ? "online" : "offline";
       });
 
-      const duration = ms(Date.now() - timeBeginning);
+      const duration = Date.now() - timeBeginning;
 
-      return `${name} - ${status} - ${duration}`;
+      return { service, status, duration };
     };
 
-    // Execute the ping and pass it to the promisses list
-    services.forEach((s) => promisses.push(pingService(s.name, s.url)));
+    const attempts = parseInt(interaction.options.getString("attempts") ?? 5);
 
-    // Once all pings are executed, concat them in a string and send result to discord
-    Promise.all(promisses).then(async (v) => {
-      let result = "";
+    const promisses = [];
 
-      v.forEach((e) => (result = result.concat(`${e}\n`)));
+    for (const service of services) {
+      for (let i = 0; i < attempts; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        promisses.push(pingService(service));
+      }
+    }
+
+    Promise.all(promisses).then(async (pings) => {
+      const result = "rola";
+
+      for (const entry of pings) {
+        console.log(entry.duration);
+      }
 
       await interaction.reply(result);
     });

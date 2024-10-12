@@ -1,20 +1,20 @@
 import { REST, Routes } from "discord.js";
 import { handleCommands } from "./commands/command-handler.js";
 
-// Load commands
-const commands = handleCommands(null);
-
-// Construct and prepare an instance of the REST module
-const rest = new REST().setToken(process.env.DISCORD_TOKEN);
-
 // Deploy commands
 (async () => {
   try {
+    // Load the commands
+    const commands = handleCommands(null);
+
+    // Create an instance of the REST module
+    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+
     console.log(
-      `[ ${Bun.color("blue", "ansi")}INFO${Bun.color("white", "ansi")} ] Deploying ${commands.length} commands.`,
+      `[ ${Bun.color("blue", "ansi")}INFO${Bun.color("white", "ansi")} ] Deploying ${commands.length} commands`,
     );
 
-    // The put method is used to fully refresh all commands in the guild with the current set
+    // Updates the list of commands in the guild with the current set
     await rest.put(
       Routes.applicationGuildCommands(
         process.env.CLIENT_ID,
@@ -24,7 +24,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     );
 
     console.log(
-      `[ ${Bun.color("green", "ansi")}OK${Bun.color("white", "ansi")} ] Registration complete.`,
+      `[ ${Bun.color("green", "ansi")}OK${Bun.color("white", "ansi")} ] Registration complete`,
     );
   } catch (error) {
     console.error(
