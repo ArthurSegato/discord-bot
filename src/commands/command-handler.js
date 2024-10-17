@@ -1,4 +1,6 @@
 import { Collection, Events } from "discord.js";
+import { color } from "bun";
+
 const { resolve } = require("path");
 const { readdirSync } = require("fs");
 
@@ -19,7 +21,7 @@ const handleCommands = (client) => {
     // Skip files that are missing the "data" or "execute" properties
     if ((!"data") in command && (!"execute") in command) {
       console.log(
-        `[ ${Bun.color("yellow", "ansi")}WARNING${Bun.color("white", "ansi")} ] The command at ${file} is missing a required "data" or "execute" property.`,
+        `[ ${color("yellow", "ansi")}WARNING${color("white", "ansi")} ] The command at ${file} is missing a required "data" or "execute" property.`,
       );
       continue;
     }
@@ -50,7 +52,7 @@ const handleCommands = (client) => {
     // Stop if no matching command is found
     if (!command) {
       console.error(
-        `[ ${Bun.color("yellow", "ansi")}WARNING${Bun.color("white", "ansi")} ] No command matching ${interaction.commandName} was found.`,
+        `[ ${color("yellow", "ansi")}WARNING${color("white", "ansi")} ] No command matching ${interaction.commandName} was found.`,
       );
       return;
     }
@@ -60,7 +62,7 @@ const handleCommands = (client) => {
       await command.execute(interaction);
     } catch (error) {
       console.error(
-        `[ ${Bun.color("red", "ansi")}FAIL${Bun.color("white", "ansi")} ] ${error}`,
+        `[ ${color("red", "ansi")}FAIL${color("white", "ansi")} ] ${error}`,
       );
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({

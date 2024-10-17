@@ -1,9 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const {
-  commands: {
-    status: { services },
-  },
-} = require("../../config.json");
+const { services, regions } = require("./status.json");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -20,34 +16,41 @@ module.exports = {
     const pingService = async (service) => {
       const timeBeginning = Date.now();
 
-      const status = await fetch(service).then((r) => {
-        return r.ok ? "online" : "offline";
-      });
+      const status = await fetch(service);
 
       const duration = Date.now() - timeBeginning;
 
-      return { service, status, duration };
+      return {
+        service: new URL(service).host.replace("www.", ""),
+        status: [status.ok ? "up" : "down"],
+        region:
+          regions[status.headers.get("x-vercel-id").split("::")[0]] ?? "N/A",
+        duration: [duration],
+      };
     };
+
+    await interaction.reply("Contacting services...");
 
     const attempts = parseInt(interaction.options.getString("attempts") ?? 5);
 
-    const promisses = [];
+    const requests = [];
 
     for (const service of services) {
       for (let i = 0; i < attempts; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        promisses.push(pingService(service));
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        requests.push(pingService(service));
       }
     }
 
-    Promise.all(promisses).then(async (pings) => {
-      const result = "rola";
-
-      for (const entry of pings) {
-        console.log(entry.duration);
-      }
-
-      await interaction.reply(result);
+    Promise.all(requests).then(async (requests) => {
+      requests.reduce((result, request) => {
+        for (const key in request) {
+          result[key] = request[key];
+        }
+        return result;
+      });
     });
+
+    await interaction.editReply("Pong again!");
   },
 };

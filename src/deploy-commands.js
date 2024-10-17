@@ -1,5 +1,6 @@
 import { REST, Routes } from "discord.js";
 import { handleCommands } from "./commands/command-handler.js";
+import { color } from "bun";
 
 // Deploy commands
 (async () => {
@@ -11,7 +12,7 @@ import { handleCommands } from "./commands/command-handler.js";
     const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
     console.log(
-      `[ ${Bun.color("blue", "ansi")}INFO${Bun.color("white", "ansi")} ] Deploying ${commands.length} commands`,
+      `[ ${color("blue", "ansi")}INFO${color("white", "ansi")} ] Deploying ${commands.length} commands`,
     );
 
     // Updates the list of commands in the guild with the current set
@@ -24,11 +25,11 @@ import { handleCommands } from "./commands/command-handler.js";
     );
 
     console.log(
-      `[ ${Bun.color("green", "ansi")}OK${Bun.color("white", "ansi")} ] Registration complete`,
+      `[ ${color("green", "ansi")}OK${color("white", "ansi")} ] Registration complete`,
     );
   } catch (error) {
     console.error(
-      `[ ${Bun.color("red", "ansi")}FAIL${Bun.color("white", "ansi")} ] ${error}`,
+      `[ ${color("red", "ansi")}FAIL${color("white", "ansi")} ] ${error}`,
     );
   }
 })();
