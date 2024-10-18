@@ -13,44 +13,60 @@ module.exports = {
         ),
     ),
   async execute(interaction) {
-    const pingService = async (service) => {
-      const timeBeginning = Date.now();
+    const checkServiceStatus = async (serviceUrl) => {
+      const requestStartTime = Date.now();
 
-      const status = await fetch(service);
+      const response = await fetch(serviceUrl);
 
-      const duration = Date.now() - timeBeginning;
+      const responseTime = Date.now() - requestStartTime;
+
+      const vercelHeader = response.headers.get("x-vercel-id");
+
+      const serviceRegion = vercelHeader
+        ? (regions[vercelHeader.split("::")[0]] ?? "N/A")
+        : "N/A";
 
       return {
-        service: new URL(service).host.replace("www.", ""),
-        status: [status.ok ? "up" : "down"],
-        region:
-          regions[status.headers.get("x-vercel-id").split("::")[0]] ?? "N/A",
-        duration: [duration],
+        service: new URL(serviceUrl).host.replace("www.", ""),
+        status: [response.ok ? "up" : "down"],
+        region: serviceRegion,
+        responseTime: [responseTime],
       };
     };
 
-    await interaction.reply("Contacting services...");
+    await interaction.reply("Verifying service status...");
 
-    const attempts = parseInt(interaction.options.getString("attempts") ?? 5);
+    const attemptsAmount = parseInt(
+      interaction.options.getString("attempts") ?? 5,
+    );
 
-    const requests = [];
-
-    for (const service of services) {
-      for (let i = 0; i < attempts; i++) {
+    const serviceStatusRequests = services.flatMap((serviceUrl) =>
+      Array.from({ length: attemptsAmount }, async () => {
         await new Promise((resolve) => setTimeout(resolve, 500));
-        requests.push(pingService(service));
+        return checkServiceStatus(serviceUrl);
+      }),
+    );
+
+    const serviceRequestResults = await Promise.all(serviceStatusRequests);
+
+    // Combine objects with the same service value
+    const combinedResults = serviceRequestResults.reduce((acc, curr) => {
+      const existing = acc.find((item) => item.service === curr.service);
+
+      if (existing) {
+        // Merge status and responseTime arrays
+        existing.status = existing.status.concat(curr.status);
+        existing.responseTime = existing.responseTime.concat(curr.responseTime);
+      } else {
+        // Add new service object if it doesn't exist in the accumulator
+        acc.push(curr);
       }
-    }
 
-    Promise.all(requests).then(async (requests) => {
-      requests.reduce((result, request) => {
-        for (const key in request) {
-          result[key] = request[key];
-        }
-        return result;
-      });
-    });
+      return acc;
+    }, []);
 
-    await interaction.editReply("Pong again!");
+    console.log(combinedResults);
+
+    await interaction.editReply("rola");
   },
 };
