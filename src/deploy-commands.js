@@ -11,8 +11,8 @@ import { color } from "bun";
     // Create an instance of the REST module
     const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
-    console.log(
-      `[ ${color("blue", "ansi")}INFO${color("white", "ansi")} ] Deploying ${commands.length} commands`,
+    console.info(
+      `${color("blue", "ansi")}[ INFO ]${color("white", "ansi")} Deploying ${commands.length} commands`,
     );
 
     // Updates the list of commands in the guild with the current set
@@ -24,12 +24,10 @@ import { color } from "bun";
       { body: commands },
     );
 
-    console.log(
-      `[ ${color("green", "ansi")}OK${color("white", "ansi")} ] Registration complete`,
+    console.info(
+      `${color("green", "ansi")}[ OK ]${color("white", "ansi")} Deploy complete`,
     );
   } catch (error) {
-    console.error(
-      `[ ${color("red", "ansi")}FAIL${color("white", "ansi")} ] ${error}`,
-    );
+    console.error(`[ FAIL ]${color("white", "ansi")} ${error}`);
   }
 })();

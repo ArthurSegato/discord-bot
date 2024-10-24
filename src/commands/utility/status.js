@@ -1,72 +1,138 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { services, regions } = require("./status.json");
+const { color } = require("bun");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("status")
-    .setDescription("Checks the status of all systems")
-    .addStringOption((option) =>
-      option
-        .setName("attempts")
-        .setDescription(
-          "How many attempts to ping the server will be executed (default 5)",
-        ),
-    ),
+    .setDescription("Checks the status of all systems"),
   async execute(interaction) {
-    const checkServiceStatus = async (serviceUrl) => {
-      const requestStartTime = Date.now();
+    const createMeasurement = async (service) => {
+      try {
+        const response = await fetch(
+          "https://api.globalping.io/v1/measurements",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
+            },
+            body: JSON.stringify({
+              type: "http",
+              target: new URL(service).host.replace("www.", ""),
+              locations: [
+                {
+                  continent: "AF",
+                  limit: 2,
+                },
+                {
+                  continent: "AN",
+                  limit: 2,
+                },
+                {
+                  continent: "AS",
+                  limit: 2,
+                },
+                {
+                  continent: "EU",
+                  limit: 2,
+                },
+                {
+                  continent: "NA",
+                  limit: 2,
+                },
+                {
+                  continent: "OC",
+                  limit: 2,
+                },
+                {
+                  continent: "SA",
+                  limit: 2,
+                },
+              ],
+              measurementOptions: {
+                protocol: "https",
+                request: {
+                  method: "head",
+                },
+              },
+            }),
+          },
+        );
 
-      const response = await fetch(serviceUrl);
+        if (!response.ok) throw new Error(response.statusText);
 
-      const responseTime = Date.now() - requestStartTime;
+        const { id } = await response.json();
 
-      const vercelHeader = response.headers.get("x-vercel-id");
-
-      const serviceRegion = vercelHeader
-        ? (regions[vercelHeader.split("::")[0]] ?? "N/A")
-        : "N/A";
-
-      return {
-        service: new URL(serviceUrl).host.replace("www.", ""),
-        status: [response.ok ? "up" : "down"],
-        region: serviceRegion,
-        responseTime: [responseTime],
-      };
+        return id;
+      } catch (err) {
+        console.error(
+          `[ FAIL ]${color("white", "ansi")} ${err.message} when trying to create a measurement `,
+        );
+      }
     };
 
-    await interaction.reply("Verifying service status...");
+    const retrieveMeasurement = async (id) => {
+      try {
+        const response = await fetch(
+          `https://api.globalping.io/v1/measurements/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
+            },
+          },
+        );
 
-    const attemptsAmount = parseInt(
-      interaction.options.getString("attempts") ?? 5,
-    );
+        if (!response.ok) throw new Error(response.statusText);
 
-    const serviceStatusRequests = services.flatMap((serviceUrl) =>
-      Array.from({ length: attemptsAmount }, async () => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        return checkServiceStatus(serviceUrl);
-      }),
-    );
-
-    const serviceRequestResults = await Promise.all(serviceStatusRequests);
-
-    // Combine objects with the same service value
-    const combinedResults = serviceRequestResults.reduce((acc, curr) => {
-      const existing = acc.find((item) => item.service === curr.service);
-
-      if (existing) {
-        // Merge status and responseTime arrays
-        existing.status = existing.status.concat(curr.status);
-        existing.responseTime = existing.responseTime.concat(curr.responseTime);
-      } else {
-        // Add new service object if it doesn't exist in the accumulator
-        acc.push(curr);
+        const { results } = await response.json();
+        return results;
+      } catch (err) {
+        console.error(err);
       }
+    };
 
-      return acc;
-    }, []);
+    await interaction.deferReply();
 
-    console.log(combinedResults);
+    const serviceMeasurements = await Promise.all(
+      services.map(createMeasurement),
+    );
 
-    await interaction.editReply("rola");
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const measurementResults = await Promise.all(
+      serviceMeasurements.map(retrieveMeasurement),
+    );
+
+    const embeds = measurementResults.flatMap((result) => {
+      const serviceUrl = result[0].result.headers.location;
+      return {
+        title: new URL(serviceUrl).host.replace("www.", ""),
+        url: serviceUrl,
+        fields: result.flatMap((item) => {
+          console.log(item);
+          return [
+            {
+              name: "Location",
+              value: `${item.probe.city}, ${item.probe.country}`,
+              inline: true,
+            },
+            {
+              name: "Status",
+              value: item.result.statusCodeName,
+              inline: true,
+            },
+            {
+              name: "Ping",
+              value: item.result.timings.total,
+              inline: true,
+            },
+          ];
+        }),
+      };
+    });
+
+    await interaction.editReply({ embeds: embeds });
   },
 };

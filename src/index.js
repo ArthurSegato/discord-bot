@@ -11,7 +11,7 @@ handleCommands(client);
 // Annnounce when the client is ready
 client.once(Events.ClientReady, (c) => {
   console.log(
-    `[ ${color("green", "ansi")}OK${color("white", "ansi")} ] Logged in as ${c.user.tag}`,
+    `${color("green", "ansi")}[ OK ]${color("white", "ansi")} Logged in as ${c.user.tag}`,
   );
 });
 
