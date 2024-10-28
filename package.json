@@ -8,6 +8,7 @@
     "prettify": "prettier . --write"
   },
   "dependencies": {
+    ".": ".",
     "discord.js": "^14.16.3",
     "eslint-config-prettier": "^9.1.0"
   },

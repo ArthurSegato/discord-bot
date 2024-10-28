@@ -16,6 +16,7 @@ Requirements for the software and other tools to build, test and push.
 Environment variables required to run this project:
 
 ```Properties
+GLOBALPING_TOKEN=""
 DISCORD_TOKEN=""
 CLIENT_ID=""
 GUILD_ID=""
@@ -57,22 +58,22 @@ yarn dev
 bun dev
 ```
 
-### Production
+### Build
 
-Start the bot and register slash commands:
+Build bot executable:
 
 ```bash
 # npm
-npm run start
+npm run build
 
 # pnpm
-pnpm run start
+pnpm run build
 
 # yarn
-yarn start
+yarn build
 
 # bun
-bun start
+bun run build
 ```
 
 ## Deployment
