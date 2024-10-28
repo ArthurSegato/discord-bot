@@ -1,6 +1,3 @@
 {
-  "services": [
-    "https://www.arthursegato.dev/api/status/",
-    "https://www.theendpoem.com/api/status/"
-  ]
+  "services": ["https://www.arthursegato.dev/", "https://www.theendpoem.com/"]
 }
