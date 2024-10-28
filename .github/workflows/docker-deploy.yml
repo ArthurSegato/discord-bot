@@ -1,10 +1,10 @@
-name: VPS Deploy
+name: Docker Deploy
 on:
   push:
     branches:
       - main
 jobs:
-  Build-Bot:
+  Build-Container:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -14,10 +14,18 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install Dependencies
-        run: bun install
+        run: bun Install
 
-        # add deploy code later
-      - name: Test bot
-        run: bun test
+      - name: Lint
+        run: bun lint
+
+      - name: Prettify
+        run: bun prettify
+
+      - name: Register commands
+        run: bun prettify
+
+      - name: Build Container
+        run: docker build -t korosan .
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
