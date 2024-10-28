@@ -5,8 +5,7 @@
     "prettify": "prettier . --write",
     "deploy": "bun ./src/deploy-commands.js",
     "start": "bun .",
-    "dev": "bun run deploy & bun run start --watch",
-    "build": "bun build --compile --minify --sourcemap . --outfile ./builds/korosan"
+    "dev": "bun run deploy & bun run start --watch"
   },
   "dependencies": {
     "discord.js": "^14.16.3",

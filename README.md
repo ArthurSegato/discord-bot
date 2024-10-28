@@ -1,5 +1,5 @@
-![Discord bot logo](.github/assets/banner.svg "Discord bot logo")
-[![VPS Deploy](https://github.com/seh-GAH-toh/Korosan/actions/workflows/deploy-vps.yml/badge.svg)](https://github.com/seh-GAH-toh/Korosan/actions/workflows/deploy-vps.yml)
+![Korosan logo](.github/assets/banner.svg "Korosan logo")
+[![Docker Deploy](https://github.com/seh-GAH-toh/Korosan/actions/workflows/docker-deploy.yml/badge.svg)](https://github.com/seh-GAH-toh/Korosan/actions/workflows/docker-deploy.yml)
 
 Korosan is a discord bot created to add extra features to my private server, such as check if my applications/servers/API's are online, calculate response times and etc...
 
@@ -18,8 +18,6 @@ Environment variables required to run this project:
 ```Properties
 GLOBALPING_TOKEN=""
 DISCORD_TOKEN=""
-CLIENT_ID=""
-GUILD_ID=""
 ```
 
 ### Setup
@@ -42,7 +40,7 @@ bun install
 
 ### Development
 
-Start the bot without registering slash commands:
+Start the bot and deploy slash commands:
 
 ```bash
 # npm
@@ -56,24 +54,6 @@ yarn dev
 
 # bun
 bun dev
-```
-
-### Build
-
-Build bot executable:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
 ## Deployment
