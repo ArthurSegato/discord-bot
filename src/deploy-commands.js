@@ -28,6 +28,8 @@ import { color } from "bun";
       `${color("green", "ansi")}[ OK ]${color("white", "ansi")} Deploy complete`,
     );
   } catch (error) {
-    console.error(`[ FAIL ]${color("white", "ansi")} ${error}`);
+    console.error(
+      `[ FAIL ]${color("white", "ansi")} ${error} when deploying commands`,
+    );
   }
 })();

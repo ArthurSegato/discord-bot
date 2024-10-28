@@ -22,8 +22,8 @@ jobs:
       - name: Prettify
         run: bun prettify
 
-      - name: Build bot
-        run: bun run build
-
       - name: Build Container
-        run: docker build -t korosan .
+        run: docker build -t sehgahtoh/korosan .
+
+      - name: Push Container
+        run: docker push sehgahtoh/korosan:latest
