@@ -61,9 +61,7 @@ const handleCommands = (client) => {
       // Execute the command
       await command.execute(interaction);
     } catch (error) {
-      console.error(
-        `[ ${color("red", "ansi")}FAIL${color("white", "ansi")} ] ${error}`,
-      );
+      console.error(`[ FAIL ]${color("white", "ansi")} ${error}`);
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({
           content: "There was an error while executing this command!",

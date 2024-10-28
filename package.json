@@ -1,11 +1,12 @@
 {
   "main": "src/index.js",
   "scripts": {
-    "dev": "bun deploy-commands & bun --watch .",
-    "build": "bun build --compile --minify --sourcemap . --outfile ./builds/korosan",
-    "deploy-commands": "bun ./src/deploy-commands.js",
     "lint": "bunx eslint .",
-    "prettify": "prettier . --write"
+    "prettify": "prettier . --write",
+    "deploy": "bun ./src/deploy-commands.js",
+    "start": "bun .",
+    "dev": "bun run deploy & bun run start --watch",
+    "build": "bun build --compile --minify --sourcemap . --outfile ./builds/korosan"
   },
   "dependencies": {
     "discord.js": "^14.16.3",
