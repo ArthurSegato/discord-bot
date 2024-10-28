@@ -25,5 +25,10 @@ jobs:
       - name: Build Container
         run: docker build -t sehgahtoh/korosan .
 
+      - name: Docker Autenticaion
+        run: docker login -u sehgahtoh -p $DOCKER_PASSWORD
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Push Container
         run: docker push sehgahtoh/korosan:latest
