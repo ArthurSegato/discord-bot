@@ -5,13 +5,7 @@ FROM oven/bun:latest
 WORKDIR /app
 
 # Copy the package and lock files
-COPY bun.lockb package.json /app/
-
-# Install dependencies
-RUN bun install
-
-# Copy the rest of the application
-COPY . /app
+COPY /builds/korosan /app/
 
 # Define the command to start the bot
-CMD ["bun", "run", "start"]
+CMD ["./korosan"]

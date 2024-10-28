@@ -14,7 +14,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install Dependencies
-        run: bun Install
+        run: bun i
 
       - name: Lint
         run: bun lint
@@ -22,10 +22,8 @@ jobs:
       - name: Prettify
         run: bun prettify
 
-      - name: Register commands
-        run: bun prettify
+      - name: Build bot
+        run: bun run build
 
       - name: Build Container
         run: docker build -t korosan .
-        env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
