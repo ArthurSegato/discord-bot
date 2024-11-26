@@ -66,7 +66,7 @@ module.exports = {
 
         if (!response.ok) throw new Error(response.statusText);
 
-        const { results, target, status } = await response.json();
+        const { results, target } = await response.json();
 
         return {
           target,
