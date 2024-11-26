@@ -1,0 +1,45 @@
+name: Auto Release
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'  # Exclude pushes for existing tags
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Git to push tags
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      # Get the latest tag and create a new version tag
+      - name: Create new tag
+        run: |
+          # Fetch tags from the remote
+          git fetch --tags
+          # Get the latest tag
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+          
+          # Increment the version
+          VERSION=$(echo $LAST_TAG | awk -F. -v OFS=. '{$NF++;print}')
+          echo "New tag: $VERSION"
+
+          # Create a new tag and push it
+          git tag $VERSION
+          git push origin $VERSION
+
+      # Create a release in GitHub
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            path/to/your/assets/* # Optionally, include files you want to upload to the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

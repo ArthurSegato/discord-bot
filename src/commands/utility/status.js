@@ -2,6 +2,12 @@ const { SlashCommandBuilder } = require("discord.js");
 const { services } = require("./status.json");
 const { color } = require("bun");
 
+// Define common headers
+const headers = new Headers({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
+});
+
 // Define measurement locations for request testing, one for each continent
 const measurementLocations = [
   { continent: "AF", limit: 1 },
@@ -12,12 +18,6 @@ const measurementLocations = [
   { continent: "OC", limit: 1 },
   { continent: "SA", limit: 1 },
 ];
-
-// Cache common headers
-const headers = new Headers({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
-});
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -45,10 +45,13 @@ module.exports = {
           },
         );
 
+        // Abort in case of a error
         if (!response.ok) throw new Error(response.statusText);
 
+        // Extract the measurement id
         const { id } = await response.json();
 
+        // Return it
         return id;
       } catch (err) {
         console.error(
@@ -59,26 +62,29 @@ module.exports = {
 
     const fetchMeasurementResults = async (measurementId) => {
       try {
-        let response = await fetch(
+        const response = await fetch(
           `https://api.globalping.io/v1/measurements/${measurementId}`,
           { headers },
         );
 
+        // Abort in case of a error
         if (!response.ok) throw new Error(response.statusText);
 
+        // Extract the measurement resultd and the service measured
         const { results, target } = await response.json();
 
-        return {
-          target,
-          results: results.map((result) => {
-            return {
-              country: result.probe.country,
-              city: result.probe.city,
-              status: result?.result?.statusCodeName ?? "NA",
-              ping: result?.result?.timings?.total ?? "NA",
-            };
-          }),
-        };
+        // Case the measurement is still running wait 1s and retrieve again
+        if (
+          results.some((item) => {
+            return item.result.status === "in-progress";
+          })
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return fetchMeasurementResults(measurementId);
+        }
+
+        // Return measurement
+        return { target, results };
       } catch (err) {
         console.error(
           `[ FAIL ]${color("white", "ansi")} ${err.message} when trying to retrieve measurements `,
@@ -95,36 +101,36 @@ module.exports = {
         services.map(createServiceMeasurement),
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
       // Fetch the measurement results for all IDs
       const measurementResults = await Promise.all(
         measurementIds.map(fetchMeasurementResults),
       );
 
-      // Construct embeds for each service result
+      // Construct embeds for each result
       const embeds = measurementResults.map((result) => {
         // Create fields for the embed using the results data
         const fields = result.results.flatMap((item) => [
           {
             name: "Location",
-            value: `${item.city}, ${item.country}`,
+            value: `${item.probe.city}, ${item.probe.country}`,
             inline: true,
           },
           {
             name: "Status",
-            value: item.status,
+            value: item.result.statusCodeName,
             inline: true,
           },
           {
             name: "Ping",
-            value: item.ping,
+            value: item.result.timings.total,
             inline: true,
           },
         ]);
 
         // Determine the embed color based on measurement success
-        const color = result.results.some((item) => item.status !== "OK")
+        const color = result.results.some(
+          (item) => item.result.statusCodeName !== "OK",
+        )
           ? "0xff6188"
           : "0xa9dc76";
 

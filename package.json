@@ -5,7 +5,7 @@
     "prettify": "prettier . --write",
     "deploy": "bun ./src/deploy-commands.js",
     "start": "bun .",
-    "dev": "bun run deploy & bun run start --watch"
+    "dev": "bun run deploy & bun --watch ."
   },
   "dependencies": {
     "discord.js": "^14.16.3",
