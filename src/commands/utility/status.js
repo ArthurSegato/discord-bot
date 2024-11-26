@@ -13,6 +13,12 @@ const measurementLocations = [
   { continent: "SA", limit: 1 },
 ];
 
+// Cache common headers
+const headers = new Headers({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
+});
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("status")
@@ -24,10 +30,7 @@ module.exports = {
           "https://api.globalping.io/v1/measurements",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
-            },
+            headers,
             body: JSON.stringify({
               type: "http",
               target: new URL(serviceUrl).host,
@@ -56,23 +59,26 @@ module.exports = {
 
     const fetchMeasurementResults = async (measurementId) => {
       try {
-        const response = await fetch(
+        let response = await fetch(
           `https://api.globalping.io/v1/measurements/${measurementId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.GLOBALPING_TOKEN}`,
-            },
-          },
+          { headers },
         );
 
         if (!response.ok) throw new Error(response.statusText);
 
-        const { results, target } = await response.json();
+        const { results, target, status } = await response.json();
 
-        results.target = target;
-
-        return results;
+        return {
+          target,
+          results: results.map((result) => {
+            return {
+              country: result.probe.country,
+              city: result.probe.city,
+              status: result?.result?.statusCodeName ?? "NA",
+              ping: result?.result?.timings?.total ?? "NA",
+            };
+          }),
+        };
       } catch (err) {
         console.error(
           `[ FAIL ]${color("white", "ansi")} ${err.message} when trying to retrieve measurements `,
@@ -89,8 +95,7 @@ module.exports = {
         services.map(createServiceMeasurement),
       );
 
-      // Wait for 3 seconds to allow measurements to complete
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // Fetch the measurement results for all IDs
       const measurementResults = await Promise.all(
@@ -98,42 +103,37 @@ module.exports = {
       );
 
       // Construct embeds for each service result
-      const embeds = measurementResults.map((results) => {
-        const serviceUrl = results.target;
-
+      const embeds = measurementResults.map((result) => {
         // Create fields for the embed using the results data
-        const fields = results.flatMap((item) => [
+        const fields = result.results.flatMap((item) => [
           {
             name: "Location",
-            value: `${item.probe.city}, ${item.probe.country}`,
+            value: `${item.city}, ${item.country}`,
             inline: true,
           },
           {
             name: "Status",
-            value: item.result.statusCodeName ?? "FAIL",
+            value: item.status,
             inline: true,
           },
           {
             name: "Ping",
-            value:
-              item.result.timings.total != null
-                ? `${item.result.timings.total}ms`
-                : "N/A",
+            value: item.ping,
             inline: true,
           },
         ]);
 
         // Determine the embed color based on measurement success
-        const color = results.some((item) => item.result.status !== "failed")
-          ? "0xa9dc76"
-          : "0xff6188";
+        const color = result.results.some((item) => item.status !== "OK")
+          ? "0xff6188"
+          : "0xa9dc76";
 
         return {
           color: parseInt(color),
           // Clean up the title by removing "www."
-          title: serviceUrl.replace("www.", ""),
+          title: result.target.replace("www.", ""),
           // Make the embed title clickable
-          url: `https://${serviceUrl}`,
+          url: `https://${result.target}`,
           fields,
           // Give the embed a discord compatible timestamp
           timestamp: new Date().toISOString(),
