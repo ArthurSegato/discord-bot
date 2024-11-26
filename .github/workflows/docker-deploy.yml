@@ -3,8 +3,10 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'  # Exclude pushes for existing tags
 jobs:
-  Build-Container:
+  Test-Code:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,11 +18,23 @@ jobs:
       - name: Install Dependencies
         run: bun i
 
-      - name: Lint
-        run: bun lint
-
       - name: Prettify
         run: bun prettify
+
+      - name: Lint
+        run: bun lint
+  Build-Container:
+    runs-on: ubuntu-latest
+    needs: Test-Code
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun Runtime
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: bun i
 
       - name: Build Container
         run: docker build -t sehgahtoh/korosan .
