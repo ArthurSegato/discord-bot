@@ -18,7 +18,7 @@ import { color } from "bun";
     // Updates the list of commands in the guild with the current set
     await rest.put(
       Routes.applicationGuildCommands(
-        process.env.CLIENT_ID,
+        process.env.APPLICATION_ID,
         process.env.GUILD_ID,
       ),
       { body: commands },
