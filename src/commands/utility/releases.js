@@ -36,7 +36,7 @@ module.exports = {
           fields: releasesUrl.flatMap((repo) => [
             {
               name: "Project",
-              value: repo.match(/\/([^\/]+)\/([^\/]+)\/releases/)[2],
+              value: repo.match(/\/([^/]+)\/([^/]+)\/releases/)[2],
               inline: true,
             },
             {
