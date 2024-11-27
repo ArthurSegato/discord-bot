@@ -1,0 +1,8 @@
+{
+  "services": ["https://www.arthursegato.dev/", "https://www.theendpoem.com/"],
+  "repos": [
+    "https://github.com/nuxt/nuxt/releases/latest",
+    "https://github.com/nitrojs/nitro/releases/latest",
+    "https://github.com/unjs/h3/releases/latest"
+  ]
+}
