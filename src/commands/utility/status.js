@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { services } = require("./status.json");
+const { services } = require("./utility.json");
 const { color } = require("bun");
 
 // Define common headers
